@@ -1,41 +1,34 @@
 function executeCommands(commands) {
     const command = (comm, idx) => {
-        const split = comm.split(/[\s,]+/);
+        const [zero, one, two] = comm.split(/[\s,]+/);
         let val;
 
-        switch (split[0]) {
+        switch (zero) {
             case 'MOV':
-                if (Number(split[1])) {
-                    voos[split[2]] = Number(split[1]);
+                if (Number(one) || Number(one) === 0) {
+                    voos[two] = Number(one);
                     break;
                 } else {
-                    voos[split[2]] = voos[split[1]];
+                    voos[two] = voos[one];
                     break;
                 }
             case 'ADD':
-                val = voos[split[1]] + voos[split[2]];
-                if (val > 255 || val < 0) {
-                    val = readjust(val);
-                }
-                voos[split[1]] = val;
+                val = voos[one] + voos[two];
+                val = readjust(val);
+                voos[one] = val;
                 break;
             case 'DEC':
-                val = voos[split[1]] - 1;
-                if (val > 255 || val < 0) {
-                    val = readjust(val);
-                }
-
-                voos[split[1]] = val;
+                val = voos[one] - 1;
+                val = readjust(val);
+                voos[one] = val;
                 break;
             case 'INC':
-                val = voos[split[1]] + 1;
-                if (val > 255 || val < 0) {
-                    val = readjust(val);
-                }
-                voos[split[1]] = val;
+                val = voos[one] + 1;
+                val = readjust(val);
+                voos[one] = val;
                 break;
             case 'JMP':
-                const loop = commands.slice(Number(split[1]), idx);
+                const loop = commands.slice(Number(one), idx);
                 while (voos['V00'] > 0) {
                     loop.forEach((el) => {
                         command(el);
@@ -51,6 +44,8 @@ function executeCommands(commands) {
         if (value > 255) return value % 256;
 
         if (value < 0) return 256 - Math.abs(value);
+
+        return value;
     };
 
     const voos = [...Array(8).keys()].reduce((acc, idx) => {
@@ -58,10 +53,11 @@ function executeCommands(commands) {
         return acc;
     }, {});
 
-    for (let idx = 0; idx < commands.length; idx++) {
-        const el = commands[idx];
+    commands.forEach((el, idx) => {
         command(el, idx);
-    }
+    });
 
     return Object.values(voos);
 }
+
+console.log(executeCommands(['MOV 5,V00', 'MOV 10,V01', 'DEC V00', 'ADD V00,V01']));
