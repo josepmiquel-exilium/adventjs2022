@@ -63,19 +63,15 @@ function executeCommands(commands) {
                     });
                 }
                 break;
+            default:
+                break;
         }
     };
 
     const readjust = (value) => {
-        if (value > 255) value = value % 256;
+        if (value > 255) return value % 256;
 
-        if (value < 0) {
-            while (value < 0) {
-                value = 256 - Math.abs(value);
-            }
-        }
-
-        return value;
+        if (value < 0) return 256 - Math.abs(value);
     };
 
     const voos = [...Array(8).keys()].reduce((acc, idx) => {
@@ -83,18 +79,14 @@ function executeCommands(commands) {
         return acc;
     }, {});
 
-    commands.forEach((el, idx) => {
+    for (let idx = 0; idx < commands.length; idx++) {
+        const el = commands[idx];
         command(el, idx);
-    });
+    }
 
     return Object.values(voos);
 }
 
-console.log(
-    executeCommands([
-        'MOV 10,V00', // V00 es 10
-        'MOV 2230,V00',
-    ])
-);
+console.log(executeCommands(['MOV 255,V00', 'INC V00', 'DEC V01', 'DEC V01']));
 
 // Output: [14, 10, 0, 0, 0, 0, 0]
