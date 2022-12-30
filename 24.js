@@ -1,37 +1,30 @@
 function canExit(maze) {
-    const startPos = maze.reduce((acc, curr, idx) => {
-        const checkPos = curr.indexOf('S');
-        if (checkPos >= 0) {
-            acc.push(idx);
-            acc.push(checkPos);
-            return acc;
-        }
+    const entryRow = maze.findIndex((inner) => inner.indexOf('S') >= 0);
+    const entryCol = maze[entryRow].findIndex((inner) => inner.indexOf('S') >= 0);
+    const entry = [entryCol, entryRow];
 
-        return acc;
-    }, []);
+    function goTo([x, y]) {
+        const result = maze[y][x] === 'E';
 
-    const endPos = maze.reduce((acc, curr, idx) => {
-        const checkPos = curr.indexOf('E');
-        if (checkPos >= 0) {
-            acc.push(idx);
-            acc.push(checkPos);
-            return acc;
-        }
+        maze[y][x] = '-';
 
-        return acc;
-    }, []);
+        const movements = [
+            [x + 1, y],
+            [x - 1, y],
+            [x, y - 1],
+            [x, y + 1],
+        ];
 
-    let pointer = startPos;
+        return (
+            result ||
+            movements
+                .filter((move) => maze[move[1]])
+                .filter((move) => [' ', 'E'].includes(maze[move[1]][move[0]]))
+                .some(goTo)
+        );
+    }
 
-    return pointer;
+    const result = goTo(entry);
+
+    return result;
 }
-
-console.log(
-    canExit([
-        [' ', ' ', 'W', ' ', 'S'],
-        [' ', ' ', ' ', ' ', ' '],
-        [' ', ' ', ' ', 'W', ' '],
-        ['W', 'W', ' ', 'W', 'W'],
-        [' ', ' ', ' ', ' ', 'E'],
-    ]) // -> true
-);
