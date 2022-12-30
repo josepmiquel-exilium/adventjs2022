@@ -1,30 +1,111 @@
 function canExit(maze) {
-    const entryRow = maze.findIndex((inner) => inner.indexOf('S') >= 0);
-    const entryCol = maze[entryRow].findIndex((inner) => inner.indexOf('S') >= 0);
-    const entry = [entryCol, entryRow];
+    const findPos = (char) => {
+        return maze.reduce((acc, curr, idx) => {
+            const checkPos = curr.indexOf(char);
+            if (checkPos >= 0) {
+                acc.push(idx);
+                acc.push(checkPos);
+                return acc;
+            }
 
-    function goTo([x, y]) {
-        const result = maze[y][x] === 'E';
+            return acc;
+        }, []);
+    };
 
-        maze[y][x] = '-';
+    const currPos = findPos('S');
+    const endPos = findPos('E');
+    const [endY, endX] = endPos;
 
-        const movements = [
-            [x + 1, y],
-            [x - 1, y],
-            [x, y - 1],
-            [x, y + 1],
-        ];
+    let block = 0;
+    let prevY;
+    let prevX;
 
-        return (
-            result ||
-            movements
-                .filter((move) => maze[move[1]])
-                .filter((move) => [' ', 'E'].includes(maze[move[1]][move[0]]))
-                .some(goTo)
-        );
+    let [currY, currX] = currPos;
+
+    const moveUp = () => {
+        if (currY > 0) {
+            currY -= 1;
+            drawCurrPos();
+            savePrevPos();
+        } else {
+            block++;
+        }
+    };
+
+    const moveDown = () => {
+        if (currY < maze.length - 1) {
+            currY += 1;
+            drawCurrPos();
+            savePrevPos();
+        } else {
+            block++;
+        }
+    };
+
+    const moveLeft = () => {
+        if (currX > 0) {
+            currX -= 1;
+            drawCurrPos();
+            savePrevPos();
+        } else {
+            block++;
+        }
+    };
+
+    const moveRigth = () => {
+        if (currX < maze[currY].length - 1) {
+            currX += 1;
+            drawCurrPos();
+            savePrevPos();
+        } else {
+            block++;
+        }
+    };
+
+    const savePrevPos = () => {
+        prevX = currX;
+        prevY = currY;
+    };
+
+    const drawCurrPos = () => {
+        maze[currY][currX] = 'X';
+    };
+
+    const goBack = () => {
+        currX = prevX;
+        currY = prevY;
+    };
+
+    while (maze[endY][endX] !== 'X') {
+        if (maze[currY][currX] === 'W' || maze[currY][currX] === 'B') {
+            block++;
+            goBack();
+        }
+
+        if (block === 3) {
+            maze[currY][currX] = 'B';
+            goBack();
+        }
+
+        console.log(endY, currY);
+
+        if (endY < currY) {
+            console.log('hola');
+            moveUp();
+        }
+
+        console.log(maze);
     }
 
-    const result = goTo(entry);
-
-    return result;
+    return maze[endY][endX] === 'X';
 }
+
+console.log(
+    canExit([
+        [' ', ' ', ' ', 'E', ' '],
+        [' ', ' ', ' ', 'W', 'W'],
+        [' ', ' ', 'W', 'W', ' '],
+        ['W', 'W', ' ', 'W', ' '],
+        [' ', ' ', ' ', ' ', 'S'],
+    ]) // -> true
+);
